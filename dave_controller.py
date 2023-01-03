@@ -1,6 +1,6 @@
 from controller import Robot
 import json
-from proximity_sensor import init_sensors, update_sensor_readings, get_wall_array
+from proximity_sensor import *
 from motors import *
 import random
 
@@ -13,7 +13,8 @@ robot.step(timestep)
 init_motors(robot, timestep)
 init_sensors(robot, timestep)
 
-bot_step = 1  # in cm
+MAX_SPEED = 6.2
+
 
 while robot.step(timestep) != -1:
     # while receiver.getQueueLength() > 0:
@@ -21,10 +22,15 @@ while robot.step(timestep) != -1:
     #     print(data)
     #     receiver.nextPacket()
     update_sensor_readings(should_print=False)
-    walls = get_wall_array()
-    print(walls)
-    if not walls[1]:
-        set_velocity(5, 5)
+    readings = get_sensor_readings()
+
+    if readings['front']:
+        set_velocity(MAX_SPEED, -MAX_SPEED)
     else:
-        set_velocity(-2, 5)
-    pass
+        if readings['left']:
+            set_velocity(MAX_SPEED, MAX_SPEED)
+        else:
+            set_velocity(MAX_SPEED/8, MAX_SPEED)
+
+    if readings['left_corner']:
+        set_velocity(MAX_SPEED, MAX_SPEED/8)

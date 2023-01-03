@@ -57,3 +57,26 @@ def get_wall_array():
         wall_array[2] = True
 
     return wall_array
+
+
+def get_sensor_readings():
+    dictionary = {
+        'left': False,
+        'right': False,
+        'left_corner': False,
+        'right_corner': False,
+        'front': False
+    }
+
+    if sensor_values[5] >= SENSOR_THRESHOLD:
+        dictionary['left'] = True
+    if sensor_values[2] >= SENSOR_THRESHOLD:
+        dictionary['right'] = True
+    if sensor_values[6] >= SENSOR_THRESHOLD:
+        dictionary['left_corner'] = True
+    if sensor_values[1] >= SENSOR_THRESHOLD:
+        dictionary['right_corner'] = True
+    if sensor_values[7] >= SENSOR_THRESHOLD:
+        dictionary['front'] = True
+
+    return dictionary
