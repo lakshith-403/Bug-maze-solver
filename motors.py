@@ -12,7 +12,7 @@ left_sensor: Optional[PositionSensor] = None
 right_sensor: Optional[PositionSensor] = None
 
 MAX_SPEED = 6.28
-ERROR_DELTA = 0.05
+ERROR_DELTA = 0.01
 
 left_pos = 0
 right_pos = 0
@@ -22,7 +22,7 @@ timestep = 0
 
 def init_motors(bot, _timestep):
     """
-    initialize left and right motors for velocity control (sets position to inf)
+    initialize robot variables locally and setup motors for position control.
 
     :param _timestep: time step of the simulation
     :param bot: E Puck robot instance
@@ -43,11 +43,26 @@ def init_motors(bot, _timestep):
     left_sensor.enable(timestep)
     right_sensor.enable(timestep)
 
-    left.setPosition(float("inf"))
-    right.setPosition(float("inf"))
+    # for Velocity control
+    # left.setPosition(float("inf"))
+    # right.setPosition(float("inf"))
+    # left.setVelocity(0)
+    # right.setVelocity(0)
 
-    left.setVelocity(0)
-    right.setVelocity(0)
+    # for Position control
+    left.setPosition(0)
+    right.setPosition(0)
+    left.setVelocity(MAX_SPEED)
+    right.setVelocity(MAX_SPEED)
+
+
+def set_position_control():
+    """
+        set motors for position control
+    """
+    global left, right, MAX_SPEED
+    left.setVelocity(MAX_SPEED)
+    right.setVelocity(MAX_SPEED)
 
 
 def set_velocity(left_velocity, right_velocity):
@@ -59,104 +74,49 @@ def set_velocity(left_velocity, right_velocity):
         :param right_velocity: Velocity for the right motor [-6.28, +6.28]
     """
     global left, right
+    left.setPosition(float("inf"))
+    right.setPosition(float("inf"))
     if left_velocity is not None:
         left.setVelocity(left_velocity)
     if right_velocity is not None:
         right.setVelocity(right_velocity)
 
 
-def move_forward():
-    left.setVelocity(MAX_SPEED)
-    right.setVelocity(MAX_SPEED)
+def get_position_delta(step):
+    """
+        find how much should the motor position change for the robot to move a step
 
-    current_left_pos = left_sensor.getValue()
-    current_right_pos = right_sensor.getValue()
-
-    print(current_right_pos)
-
-    target_left_pos = current_left_pos + 15
-    target_right_pos = current_right_pos + 15
-
-    left.setPosition(target_left_pos)
-    right.setPosition(target_right_pos)
-
-    while robot.step(timestep) != -1:
-        current_left_pos = left_sensor.getValue()
-        current_right_pos = right_sensor.getValue()
-        if abs(current_right_pos - target_right_pos) <= ERROR_DELTA and \
-                abs(current_left_pos - target_left_pos) <= ERROR_DELTA:
-            break
-
-    return
-
-
-def set_motors_to_forward():
-    left.setPosition(float("inf"))
-    right.setPosition(float("inf"))
-    left.setVelocity(MAX_SPEED)
-    right.setVelocity(MAX_SPEED)
-
-
-def get_angle(receiver: Receiver):
-    while receiver.getQueueLength() > 0:
-        data = json.loads(receiver.getData().decode('utf-8'))['robotAngleDegrees']
-        print(data)
-        receiver.nextPacket()
-        return data
-
-
-def stop_bot(milliseconds):
-    left.setVelocity(0)
-    right.setVelocity(0)
-    left.setPosition(float("inf"))
-    right.setPosition(float("inf"))
-    for _ in range(0, milliseconds, timestep):
-        robot.step(timestep)
+        :param step: step distance in centimeters
+        :return: motor position delta required for a step
+    """
+    return step / math.pi * 2.05
 
 
 def turn(direction):
-    stop_bot(500)
+    """
+        Turn the robot by 90% left or right
 
-    left.setVelocity(MAX_SPEED / 4.0)
-    right.setVelocity(MAX_SPEED / 4.0)
+        :param direction: right = 1, left = -1
+    """
+    global left, right, ERROR_DELTA
+    delta = get_position_delta(math.pi * 1.2)
+    set_position(delta * direction, -1 * delta * direction)
 
-    current_left_pos = left_sensor.getValue()
-    current_right_pos = right_sensor.getValue()
 
-    # print(current_right_pos)
-
-    target_left_pos = current_left_pos - 2.25 * (-1 if direction == "r" else 1)
-    target_right_pos = current_right_pos + 2.25 * (-1 if direction == "r" else 1)
-
-    left.setPosition(target_left_pos)
-    right.setPosition(target_right_pos)
-
-    while robot.step(timestep) != -1:
-        current_left_pos = left_sensor.getValue()
-        current_right_pos = right_sensor.getValue()
-        # print(current_left_pos, current_right_pos)
-        if abs(current_right_pos - target_right_pos) <= ERROR_DELTA and \
-                abs(current_left_pos - target_left_pos) <= ERROR_DELTA:
-            break
-
-    stop_bot(500)
-
+def move_forward(step):
+    set_position(get_position_delta(step), get_position_delta(step))
     return
 
 
-def forward_bit():
-    stop_bot(300)
-
-    left.setVelocity(MAX_SPEED)
-    right.setVelocity(MAX_SPEED)
+def set_position(left_delta, right_delta):
+    global left, right, ERROR_DELTA
+    set_position_control()
 
     current_left_pos = left_sensor.getValue()
     current_right_pos = right_sensor.getValue()
 
-    # print(current_right_pos)
-
-    target_left_pos = current_left_pos + 3
-    target_right_pos = current_right_pos + 3
+    target_left_pos = current_left_pos + left_delta
+    target_right_pos = current_right_pos + right_delta
 
     left.setPosition(target_left_pos)
     right.setPosition(target_right_pos)
@@ -164,11 +124,8 @@ def forward_bit():
     while robot.step(timestep) != -1:
         current_left_pos = left_sensor.getValue()
         current_right_pos = right_sensor.getValue()
-        # print(current_left_pos, current_right_pos)
         if abs(current_right_pos - target_right_pos) <= ERROR_DELTA and \
                 abs(current_left_pos - target_left_pos) <= ERROR_DELTA:
             break
-
-    stop_bot(300)
 
     return

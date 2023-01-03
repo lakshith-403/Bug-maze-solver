@@ -1,7 +1,7 @@
 ps = []
 sensor_values = []
 
-SENSOR_THRESHOLD = 300
+SENSOR_THRESHOLD = 80
 
 
 def init_sensors(robot, timestep):
@@ -54,6 +54,6 @@ def get_wall_array():
     if sensor_values[0] >= SENSOR_THRESHOLD or sensor_values[7] >= SENSOR_THRESHOLD:
         wall_array[1] = True
     if sensor_values[2] >= SENSOR_THRESHOLD:
-        wall_array[0] = True
+        wall_array[2] = True
 
     return wall_array
