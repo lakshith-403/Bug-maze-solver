@@ -1,13 +1,11 @@
 '''
-todo yellow cam read -> set to no wall
 todo check if the bot is stuck in the same place -> go backward and rotate till it faces the target
+todo follow wall on left or right depending on the target position
 '''
 
-from controller import Robot
-import json
 from proximity_sensor import *
 from motors import *
-import random
+from cam import *
 
 robot = Robot()
 timestep = int(robot.getBasicTimeStep())
@@ -17,6 +15,7 @@ receiver.enable(10)
 robot.step(timestep)
 init_motors(robot, timestep)
 init_sensors(robot, timestep)
+init_cam(robot, timestep)
 
 MAX_SPEED = 6.2
 
@@ -79,6 +78,10 @@ while robot.step(timestep) != -1:
                     target_x = ball[0]
                     target_y = ball[1]
         receiver.nextPacket()
+
+    if can_see_ball():
+        set_velocity(MAX_SPEED, MAX_SPEED)
+        continue
 
     update_sensor_readings(should_print=False)
     readings = get_sensor_readings()
