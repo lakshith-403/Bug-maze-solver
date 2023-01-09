@@ -6,6 +6,7 @@ todo follow wall on left or right depending on the target position
 from proximity_sensor import *
 from motors import *
 from cam import *
+import time
 
 robot = Robot()
 timestep = int(robot.getBasicTimeStep())
@@ -29,6 +30,20 @@ target_y = 100
 
 current_angle = 0
 best_index = 0
+
+position_record = (time.time(), [0, 0])
+
+
+def is_stuck(x, y):
+    global position_record
+
+    time_now = time.time()
+    if get_distance(x, y, position_record[1][0], position_record[1][1]) > 0.08:
+        position_record = (time_now, [x, y])
+    else:
+        if time_now - position_record[0] > 5:
+            return True
+    return False
 
 
 def get_distance(x1, y1, x2, y2):
@@ -78,6 +93,13 @@ while robot.step(timestep) != -1:
                     target_x = ball[0]
                     target_y = ball[1]
         receiver.nextPacket()
+
+    stuck = is_stuck(current_x, current_y)
+
+    if stuck:
+        set_position(-5, -5)
+        state = "heading_target"
+        continue
 
     if can_see_ball():
         set_velocity(MAX_SPEED, MAX_SPEED)
