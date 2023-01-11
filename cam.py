@@ -33,7 +33,7 @@ def can_see_ball():
 
     # if there are any white pixels on mask, sum will be > 0
     has_yellow = np.sum(mask)
-    print(has_yellow)
+
     if has_yellow > 50000:
         return True
     else:

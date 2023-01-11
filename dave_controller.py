@@ -64,9 +64,7 @@ def get_angle_delta():
 
     if target_angle < 0:
         target_angle = 360 + target_angle
-    # target -= 90
 
-    print(f"{target_angle} , {current_angle}")
     return angle_abs(target_angle, current_angle)
 
 
@@ -105,7 +103,7 @@ while robot.step(timestep) != -1:
     stuck = is_stuck(current_x, current_y)
 
     if stuck:
-        set_position(-5, -5)
+        set_position(-3, -3)
         state = "heading_target"
         continue
 
@@ -117,11 +115,10 @@ while robot.step(timestep) != -1:
     readings = get_sensor_readings(direction=wall_follow_direction)
 
     angle_delta = get_angle_delta()
-    print(f"{angle_delta} target: {target_x} {target_y} current: {target_x} {target_y}")
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            print("heading")
+            # print("heading_target")
             set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
         else:  # fix the angle
@@ -138,6 +135,7 @@ while robot.step(timestep) != -1:
             set_velocity(0, 0)
 
     elif state == "wall_following":
+        # print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
