@@ -1,7 +1,7 @@
 ps = []
 sensor_values = []
 
-SENSOR_THRESHOLD = 300
+SENSOR_THRESHOLD = 240
 
 
 def init_sensors(robot, timestep):
@@ -72,14 +72,14 @@ def get_sensor_readings(direction):
         dictionary['left'] = True
     if sensor_values[2] >= SENSOR_THRESHOLD:
         dictionary['right'] = True
-    if sensor_values[6] >= SENSOR_THRESHOLD:
+    if sensor_values[6] >= SENSOR_THRESHOLD / 1.5:
         dictionary['left_corner'] = True
-    if sensor_values[1] >= SENSOR_THRESHOLD:
+    if sensor_values[1] >= SENSOR_THRESHOLD / 1.5:
         dictionary['right_corner'] = True
 
-    if direction == "left" and sensor_values[7] >= SENSOR_THRESHOLD:
+    if direction == "left" and sensor_values[7] >= SENSOR_THRESHOLD / 3:
         dictionary['front'] = True
-    if direction == "right" and sensor_values[0] >= SENSOR_THRESHOLD:
+    if direction == "right" and sensor_values[0] >= SENSOR_THRESHOLD / 3:
         dictionary['front'] = True
 
     return dictionary
