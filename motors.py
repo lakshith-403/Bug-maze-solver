@@ -1,4 +1,5 @@
 import math
+import time
 from typing import Optional
 from controller import Motor, PositionSensor, Robot, Receiver
 import json
@@ -106,6 +107,15 @@ def turn(direction):
 def move_forward(step):
     set_position(get_position_delta(step), get_position_delta(step))
     return
+
+
+def go_back():
+    start_time = time.time()
+    global robot
+    while robot.step(timestep) != -1:
+        set_velocity(-6, -6)
+        if time.time() - start_time > 1:
+            break
 
 
 def set_position(left_delta, right_delta):

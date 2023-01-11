@@ -6,7 +6,7 @@ from cam import *
 import time
 
 robot = Robot()
-timestep = int(robot.getBasicTimeStep())
+timestep = 2  #int(robot.getBasicTimeStep())
 receiver = robot.getDevice("receiver")
 receiver.enable(10)
 
@@ -41,10 +41,10 @@ def is_stuck(x, y):
     global position_record
 
     time_now = time.time()
-    if get_distance(x, y, position_record[1][0], position_record[1][1]) > 0.08:
+    if get_distance(x, y, position_record[1][0], position_record[1][1]) > 0.07:
         position_record = (time_now, [x, y])
     else:
-        if time_now - position_record[0] > 5:
+        if time_now - position_record[0] > 2:
             return True
     return False
 
@@ -103,7 +103,7 @@ while robot.step(timestep) != -1:
     stuck = is_stuck(current_x, current_y)
 
     if stuck:
-        set_position(-3, -3)
+        go_back()
         state = "heading_target"
         continue
 
@@ -129,9 +129,9 @@ while robot.step(timestep) != -1:
         if readings['front'] and not turning_to_goal:
             state = "wall_following"
             if angle_delta > 0:
-                wall_follow_direction = "left"
-            else:
                 wall_follow_direction = "right"
+            else:
+                wall_follow_direction = "left"
             set_velocity(0, 0)
 
     elif state == "wall_following":

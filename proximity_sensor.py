@@ -1,7 +1,7 @@
 ps = []
 sensor_values = []
 
-SENSOR_THRESHOLD = 100
+SENSOR_THRESHOLD = 300
 
 
 def init_sensors(robot, timestep):
