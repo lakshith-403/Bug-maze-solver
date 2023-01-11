@@ -37,6 +37,20 @@ wall_follow_direction = "left"
 got_money = False
 turning_to_goal = False
 
+dollars = 0
+
+
+def reset_data():
+    global state, target_x, target_y, target_angle, best_index, got_money, turning_to_goal
+    state = "heading_target"  # "heading_target"
+    target_x = 100
+    target_y = 100
+    target_angle = 0
+    best_index = 0
+    got_money = False
+    turning_to_goal = False
+
+
 def is_stuck(x, y):
     global position_record
 
@@ -71,6 +85,10 @@ def get_angle_delta():
 while robot.step(timestep) != -1:
     while receiver.getQueueLength() > 0:
         data = json.loads(receiver.getData().decode('utf-8'))
+
+        if data["dollars"] != dollars:
+            reset_data()
+            dollars = data["dollars"]
 
         current_x = data["robot"][0]
         current_y = data["robot"][1]
@@ -118,7 +136,7 @@ while robot.step(timestep) != -1:
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            # print("heading_target")
+            print("heading_target")
             set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
         else:  # fix the angle
@@ -135,7 +153,7 @@ while robot.step(timestep) != -1:
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        # print("wall_following")
+        print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
