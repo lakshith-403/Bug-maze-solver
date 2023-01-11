@@ -55,7 +55,7 @@ def is_stuck(x, y):
     global position_record
 
     time_now = time.time()
-    if get_distance(x, y, position_record[1][0], position_record[1][1]) > 0.07:
+    if get_distance(x, y, position_record[1][0], position_record[1][1]) > 0.01:
         position_record = (time_now, [x, y])
     else:
         if time_now - position_record[0] > 2:
@@ -121,11 +121,13 @@ while robot.step(timestep) != -1:
     stuck = is_stuck(current_x, current_y)
 
     if stuck:
+        print("stuck")
         go_back()
         state = "heading_target"
         continue
 
     if can_see_ball():
+        print("can_see_ball")
         set_velocity(MAX_SPEED, MAX_SPEED)
         continue
 
