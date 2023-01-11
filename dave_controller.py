@@ -1,7 +1,4 @@
-'''
-todo check if the bot is stuck in the same place -> go backward and rotate till it faces the target
-todo follow wall on left or right depending on the target position
-'''
+
 
 from proximity_sensor import *
 from motors import *
@@ -28,11 +25,17 @@ current_y = 0
 target_x = 100
 target_y = 100
 
+target_angle = 0
+
 current_angle = 0
 best_index = 0
 
 position_record = (time.time(), [0, 0])
 
+wall_follow_direction = "left"
+
+got_money = False
+turning_to_goal = False
 
 def is_stuck(x, y):
     global position_record
@@ -56,15 +59,15 @@ def angle_abs(angle1, angle2):
 
 
 def get_angle_delta():
-    global target_y, target_x, current_y, current_x, current_angle
-    target = math.degrees(math.atan2(target_y - current_y, target_x - current_x))
+    global target_y, target_x, current_y, current_x, current_angle, target_angle
+    target_angle = math.degrees(math.atan2(target_y - current_y, target_x - current_x))
 
-    if target < 0:
-        target = 360 - target
+    if target_angle < 0:
+        target_angle = 360 + target_angle
     # target -= 90
 
-    print(f"{target} , {current_angle}")
-    return angle_abs(target, current_angle)
+    print(f"{target_angle} , {current_angle}")
+    return angle_abs(target_angle, current_angle)
 
 
 while robot.step(timestep) != -1:
@@ -85,6 +88,11 @@ while robot.step(timestep) != -1:
                                                                                        target_y):
                     target_x = goal[0]
                     target_y = goal[1]
+
+            if not got_money:
+                state = "heading_target"
+                got_money = True
+                turning_to_goal = True
         else:
             balls = data["collectibles"]
             for ball in balls:
@@ -106,35 +114,52 @@ while robot.step(timestep) != -1:
         continue
 
     update_sensor_readings(should_print=False)
-    readings = get_sensor_readings()
+    readings = get_sensor_readings(direction=wall_follow_direction)
 
     angle_delta = get_angle_delta()
-    print(f"{angle_delta} target: {target_x} {target_y}")
+    print(f"{angle_delta} target: {target_x} {target_y} current: {target_x} {target_y}")
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
             print("heading")
             set_velocity(MAX_SPEED, MAX_SPEED)
+            turning_to_goal = False
         else:  # fix the angle
             if angle_delta > 0:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
             elif angle_delta < 0:
                 set_velocity(-MAX_SPEED, MAX_SPEED)
-        if readings['front']:
+        if readings['front'] and not turning_to_goal:
             state = "wall_following"
+            if angle_delta > 0:
+                wall_follow_direction = "left"
+            else:
+                wall_follow_direction = "right"
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        if readings['front']:
-            set_velocity(MAX_SPEED, -MAX_SPEED)
-        else:
-            if readings['left']:
-                set_velocity(MAX_SPEED, MAX_SPEED)
+        if wall_follow_direction == "left":
+            if readings['front']:
+                set_velocity(MAX_SPEED, -MAX_SPEED)
             else:
-                set_velocity(MAX_SPEED / 8, MAX_SPEED)
+                if readings['left']:
+                    set_velocity(MAX_SPEED, MAX_SPEED)
+                else:
+                    set_velocity(MAX_SPEED / 8, MAX_SPEED)
 
-        if readings['left_corner']:
-            set_velocity(MAX_SPEED, MAX_SPEED / 8)
+            if readings['left_corner']:
+                set_velocity(MAX_SPEED, MAX_SPEED / 8)
+        elif wall_follow_direction == "right":
+            if readings['front']:
+                set_velocity(-MAX_SPEED, MAX_SPEED)
+            else:
+                if readings['right']:
+                    set_velocity(MAX_SPEED, MAX_SPEED)
+                else:
+                    set_velocity(MAX_SPEED, MAX_SPEED / 8)
 
-        if abs(angle_delta) < 10:
+            if readings['right_corner']:
+                set_velocity(MAX_SPEED/8, MAX_SPEED)
+
+        if abs(angle_delta) < 10 and not readings['front']:
             state = "heading_target"
