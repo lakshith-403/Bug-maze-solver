@@ -47,6 +47,8 @@ def get_sensor_readings(direction):
     True If wall exists else False.
     left and right distance thresholds are lower than front.
     from two front sensors, only one sensor is used depending on the wall follow direction.
+    threshold for left, right will change depending on if there's a front wall
+
     :param direction: 'left' or 'right'
     :return: wall dictionary
     """
@@ -58,18 +60,18 @@ def get_sensor_readings(direction):
         'front': False
     }
 
-    if sensor_values[5] >= SENSOR_THRESHOLD:
+    if direction == "left" and sensor_values[7] >= SENSOR_THRESHOLD / 3:
+        dictionary['front'] = True
+    if direction == "right" and sensor_values[0] >= SENSOR_THRESHOLD / 3:
+        dictionary['front'] = True
+
+    if sensor_values[5] >= (SENSOR_THRESHOLD if not dictionary['front'] else SENSOR_THRESHOLD / 3):
         dictionary['left'] = True
-    if sensor_values[2] >= SENSOR_THRESHOLD:
+    if sensor_values[2] >= (SENSOR_THRESHOLD if not dictionary['front'] else SENSOR_THRESHOLD / 3):
         dictionary['right'] = True
     if sensor_values[6] >= SENSOR_THRESHOLD / 1.5:
         dictionary['left_corner'] = True
     if sensor_values[1] >= SENSOR_THRESHOLD / 1.5:
         dictionary['right_corner'] = True
-
-    if direction == "left" and sensor_values[7] >= SENSOR_THRESHOLD / 3:
-        dictionary['front'] = True
-    if direction == "right" and sensor_values[0] >= SENSOR_THRESHOLD / 3:
-        dictionary['front'] = True
 
     return dictionary
