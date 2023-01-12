@@ -155,7 +155,7 @@ while robot.step(timestep) != -1:
         continue
 
     if can_see_ball():
-        # print("can_see_ball")
+        print("can_see_ball")
         set_velocity(MAX_SPEED, MAX_SPEED)
         continue
 
@@ -166,7 +166,7 @@ while robot.step(timestep) != -1:
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            # print("heading_target")
+            print("heading_target")
             set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
         else:  # fix the angle
@@ -174,16 +174,16 @@ while robot.step(timestep) != -1:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
             elif angle_delta < 0:
                 set_velocity(-MAX_SPEED, MAX_SPEED)
-        if readings['front'] and not turning_to_goal:  # found wall -> follow that
+        if (readings['front'] or readings['close_left_corner'] or readings['close_right_corner']) and not turning_to_goal :  # found wall -> follow that
             state = "wall_following"
-            if random.random() > 0.5:  # randomly decide the turning direction
+            if angle_delta > 0:  # randomly decide the turning direction
                 wall_follow_direction = "right"
             else:
                 wall_follow_direction = "left"
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        # print("wall_following")
+        print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
