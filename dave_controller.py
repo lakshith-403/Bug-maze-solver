@@ -1,4 +1,4 @@
-
+import random
 
 from proximity_sensor import *
 from motors import *
@@ -149,13 +149,13 @@ while robot.step(timestep) != -1:
     stuck = is_stuck(current_x, current_y)
 
     if stuck:
-        print("stuck")
+        # print("stuck")
         go_back()
         state = "heading_target"
         continue
 
     if can_see_ball():
-        print("can_see_ball")
+        # print("can_see_ball")
         set_velocity(MAX_SPEED, MAX_SPEED)
         continue
 
@@ -166,7 +166,7 @@ while robot.step(timestep) != -1:
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            print("heading_target")
+            # print("heading_target")
             set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
         else:  # fix the angle
@@ -176,14 +176,14 @@ while robot.step(timestep) != -1:
                 set_velocity(-MAX_SPEED, MAX_SPEED)
         if readings['front'] and not turning_to_goal:  # found wall -> follow that
             state = "wall_following"
-            if angle_delta > 0:  # decide the turning direction from the target por
+            if random.random() > 0.5:  # randomly decide the turning direction
                 wall_follow_direction = "right"
             else:
                 wall_follow_direction = "left"
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        print("wall_following")
+        # print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
