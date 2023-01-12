@@ -30,7 +30,6 @@ def update_sensor_readings(should_print: bool):
     :param should_print: should print the sensor values
 
     updates the global variable 'sensor_values' with sensor readings
-    300 > is wall exists
     """
     global sensor_values
     sensor_values = []
@@ -42,24 +41,15 @@ def update_sensor_readings(should_print: bool):
         print()
 
 
-def get_wall_array():
-    """
-    Check and return wall status in the current position of the robot.
-
-    :return: Boolean array of length 3. Do walls exist on [left, front, right]
-    """
-    wall_array = [False, False, False]
-    if sensor_values[5] >= SENSOR_THRESHOLD:
-        wall_array[0] = True
-    if sensor_values[0] >= SENSOR_THRESHOLD or sensor_values[7] >= SENSOR_THRESHOLD:
-        wall_array[1] = True
-    if sensor_values[2] >= SENSOR_THRESHOLD:
-        wall_array[2] = True
-
-    return wall_array
-
-
 def get_sensor_readings(direction):
+    """
+    Create a dict with keys ['left', 'right' , 'left_corner', 'right_corner', 'front'].
+    True If wall exists else False.
+    left and right distance thresholds are lower than front.
+    from two front sensors, only one sensor is used depending on the wall follow direction.
+    :param direction: 'left' or 'right'
+    :return: wall dictionary
+    """
     dictionary = {
         'left': False,
         'right': False,
