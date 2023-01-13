@@ -1,9 +1,29 @@
-import random
+"""
+Author: Lakshith Nishshanke
 
+Notes:
+
+- A Bug algorithm is used at the base level
+- Strategy is to simply find a yellow ball, go bak to a target and repeat
+- Please wait if the bot  looks stuck, it will go backward if it's stuck for some seconds
+- There's a certain degree of randomization observed due to the wall follow direction choosing, so if it
+  looks like the bot is going on a loop, it can fix itself after some time
+- Sometimes Robot picks up the longer path to chase an object, nonetheless it reaches it
+- camera is used to go towards a ball if it sees it.
+
+
+How to run:
+- Keep all three files, (cam.py, motors.py, proximity_sensor.py) in the same directory
+- install numpy and openCV
+    - https://pypi.org/project/numpy/
+    - https://pypi.org/project/opencv-python/
+"""
+import math
 from proximity_sensor import *
 from motors import *
 from cam import *
 import time
+import json
 
 robot = Robot()
 timestep = 2
@@ -155,7 +175,7 @@ while robot.step(timestep) != -1:
         continue
 
     if can_see_ball():
-        print("can_see_ball")
+        # print("can_see_ball")
         set_velocity(MAX_SPEED, MAX_SPEED)
         continue
 
@@ -166,7 +186,7 @@ while robot.step(timestep) != -1:
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            print("heading_target")
+            # print("heading_target")
             set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
         else:  # fix the angle
@@ -176,14 +196,14 @@ while robot.step(timestep) != -1:
                 set_velocity(-MAX_SPEED, MAX_SPEED)
         if (readings['front'] or readings['close_left_corner'] or readings['close_right_corner']) and not turning_to_goal :  # found wall -> follow that
             state = "wall_following"
-            if angle_delta > 0:  # randomly decide the turning direction
+            if angle_delta > 0:  # decide the turning direction from orientation respect to target
                 wall_follow_direction = "right"
             else:
                 wall_follow_direction = "left"
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        print("wall_following")
+        # print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
@@ -191,10 +211,10 @@ while robot.step(timestep) != -1:
                 if readings['left']:
                     set_velocity(MAX_SPEED, MAX_SPEED)
                 else:
-                    set_velocity(MAX_SPEED / 8, MAX_SPEED)
+                    set_velocity(MAX_SPEED / 10, MAX_SPEED)
 
             if readings['left_corner']:
-                set_velocity(MAX_SPEED, MAX_SPEED / 8)
+                set_velocity(MAX_SPEED, MAX_SPEED / 10)
         elif wall_follow_direction == "right":
             if readings['front']:
                 set_velocity(-MAX_SPEED, MAX_SPEED)
@@ -202,10 +222,10 @@ while robot.step(timestep) != -1:
                 if readings['right']:
                     set_velocity(MAX_SPEED, MAX_SPEED)
                 else:
-                    set_velocity(MAX_SPEED, MAX_SPEED / 8)
+                    set_velocity(MAX_SPEED, MAX_SPEED / 10)
 
             if readings['right_corner']:
-                set_velocity(MAX_SPEED/8, MAX_SPEED)
+                set_velocity(MAX_SPEED / 10, MAX_SPEED)
 
         if abs(angle_delta) < 10 and not readings['front']:  # heading the target, so switch to that mode
             state = "heading_target"

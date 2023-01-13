@@ -1,8 +1,6 @@
-import math
 import time
 from typing import Optional
-from controller import Motor, PositionSensor, Robot, Receiver
-import json
+from controller import Motor, PositionSensor, Robot
 
 robot: Optional[Robot] = None
 
