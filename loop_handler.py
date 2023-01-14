@@ -33,8 +33,8 @@ def pick_direction(angle_delta: float, position: Tuple['float']) -> str:
     new_choice = current_choice
     if prev_choice == current_choice:  # about to go in a loop
         new_choice = "left" if current_choice == "right" else "right"
-    else:
-        choices_history.append((position[0], position[1], new_choice))
+
+    choices_history.append((position[0], position[1], new_choice))
 
     return new_choice
 
