@@ -25,6 +25,7 @@ from cam import *
 import time
 import json
 import loop_handler
+import wall_pid
 
 robot = Robot()
 timestep = 2
@@ -189,13 +190,11 @@ while robot.step(timestep) != -1:
     if state == "heading_target":
         if abs(angle_delta) < 10:
             print("heading_target")
-            set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
-        else:  # fix the angle
-            if angle_delta > 0:
-                set_velocity(MAX_SPEED, -MAX_SPEED)
-            elif angle_delta < 0:
-                set_velocity(-MAX_SPEED, MAX_SPEED)
+
+        left_speed, right_speed = wall_pid.get_correction(angle_delta, MAX_SPEED/2*3)
+        set_velocity(left_speed, right_speed)
+
         if (readings['front'] or readings['close_left_corner'] or readings['close_right_corner']) and not turning_to_goal :  # found wall -> follow that
             state = "wall_following"
             wall_follow_direction = loop_handler.pick_direction(angle_delta, (current_x, current_y))

@@ -26,7 +26,7 @@ def pick_direction(angle_delta: float, position: Tuple['float']) -> str:
 
     prev_choice = ""
     for choice in choices_history:
-        if get_distance(choice[0], choice[1], position[0], position[1]) < 0.1:  # met this place earlier
+        if get_distance(choice[0], choice[1], position[0], position[1]) < 0.2:  # met this place earlier
             prev_choice = choice[2]
             break
 
