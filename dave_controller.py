@@ -24,6 +24,7 @@ from motors import *
 from cam import *
 import time
 import json
+import loop_handler
 
 robot = Robot()
 timestep = 2
@@ -144,6 +145,7 @@ while robot.step(timestep) != -1:
         current_angle = data["robotAngleDegrees"]
 
         if data["rupees"] != 0:  # if got rupees then target chasing mode
+            loop_handler.clear_history()
             goals = data["goals"]
             target_x = 1000
             target_y = 1000
@@ -186,7 +188,7 @@ while robot.step(timestep) != -1:
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            # print("heading_target")
+            print("heading_target")
             set_velocity(MAX_SPEED, MAX_SPEED)
             turning_to_goal = False
         else:  # fix the angle
@@ -196,14 +198,12 @@ while robot.step(timestep) != -1:
                 set_velocity(-MAX_SPEED, MAX_SPEED)
         if (readings['front'] or readings['close_left_corner'] or readings['close_right_corner']) and not turning_to_goal :  # found wall -> follow that
             state = "wall_following"
-            if angle_delta > 0:  # decide the turning direction from orientation respect to target
-                wall_follow_direction = "right"
-            else:
-                wall_follow_direction = "left"
+            wall_follow_direction = loop_handler.pick_direction(angle_delta, (current_x, current_y))
+            print(wall_follow_direction)
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        # print("wall_following")
+        print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
