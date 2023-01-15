@@ -139,6 +139,7 @@ while robot.step(timestep) != -1:
 
         if data["dollars"] != dollars:  # reached a target with rupees, reset data to chase the next ball
             reset_data()
+            loop_handler.clear_history()
             dollars = data["dollars"]
 
         current_x = data["robot"][0]
