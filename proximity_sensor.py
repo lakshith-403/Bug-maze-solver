@@ -1,3 +1,5 @@
+import wall_pid
+
 ps = []
 sensor_values = []
 
@@ -79,5 +81,10 @@ def get_sensor_readings(direction):
         dictionary['close_left_corner'] = True
     if sensor_values[1] >= SENSOR_THRESHOLD:
         dictionary['close_right_corner'] = True
+
+    # dictionary['left_dis'] = wall_pid.get_distance(sensor_values[5])
+    # dictionary['right_dis'] = wall_pid.get_distance(sensor_values[2])
+    #
+    # print(f"{wall_pid.get_distance(sensor_values[5])} <-> {wall_pid.get_distance(sensor_values[2])}")
 
     return dictionary

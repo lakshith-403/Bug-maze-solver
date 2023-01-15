@@ -25,6 +25,7 @@ from cam import *
 import time
 import json
 import loop_handler
+import angle_pid
 import wall_pid
 
 robot = Robot()
@@ -146,7 +147,6 @@ while robot.step(timestep) != -1:
         current_angle = data["robotAngleDegrees"]
 
         if data["rupees"] != 0:  # if got rupees then target chasing mode
-            loop_handler.clear_history()
             goals = data["goals"]
             target_x = 1000
             target_y = 1000
@@ -160,6 +160,7 @@ while robot.step(timestep) != -1:
                 state = "heading_target"
                 got_money = True
                 turning_to_goal = True
+                loop_handler.clear_history()
         else:  # ball chasing mode
             balls = data["collectibles"]
             for ball in balls:  # find the nearest ball
@@ -168,6 +169,8 @@ while robot.step(timestep) != -1:
                     target_x = ball[0]
                     target_y = ball[1]
         receiver.nextPacket()
+
+    loop_handler.notify_position(current_x, current_y)
 
     stuck = is_stuck(current_x, current_y)
 
@@ -189,10 +192,10 @@ while robot.step(timestep) != -1:
 
     if state == "heading_target":
         if abs(angle_delta) < 10:
-            print("heading_target")
+            # print("heading_target")
             turning_to_goal = False
 
-        left_speed, right_speed = wall_pid.get_correction(angle_delta, MAX_SPEED/2*3)
+        left_speed, right_speed = angle_pid.get_correction(angle_delta, MAX_SPEED/2*3)
         set_velocity(left_speed, right_speed)
 
         if (readings['front'] or readings['close_left_corner'] or readings['close_right_corner']) and not turning_to_goal :  # found wall -> follow that
@@ -202,7 +205,7 @@ while robot.step(timestep) != -1:
             set_velocity(0, 0)
 
     elif state == "wall_following":
-        print("wall_following")
+        # print("wall_following")
         if wall_follow_direction == "left":
             if readings['front']:
                 set_velocity(MAX_SPEED, -MAX_SPEED)
