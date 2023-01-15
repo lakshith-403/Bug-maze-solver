@@ -6,14 +6,13 @@ Notes:
 - A Bug algorithm is used at the base level
 - Strategy is to simply find a yellow ball, go bak to a target and repeat
 - Please wait if the bot  looks stuck, it will go backward if it's stuck for some seconds
-- There's a certain degree of randomization observed due to the wall follow direction choosing, so if it
-  looks like the bot is going on a loop, it can fix itself after some time
+- There's a mechanism to free itself from loops
 - Sometimes Robot picks up the longer path to chase an object, nonetheless it reaches it
 - camera is used to go towards a ball if it sees it.
 
 
 How to run:
-- Keep all three files, (cam.py, motors.py, proximity_sensor.py) in the same directory
+- Keep all files in the same directory as it is
 - install numpy and openCV
     - https://pypi.org/project/numpy/
     - https://pypi.org/project/opencv-python/

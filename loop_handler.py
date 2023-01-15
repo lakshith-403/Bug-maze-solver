@@ -21,7 +21,8 @@ def notify_position(x, y):
     global pending_choice, choices_history
     if pending_choice is None:
         return
-    if get_distance(x,y, pending_choice[0], pending_choice[1]) > 0.5:
+    if get_distance(x, y, pending_choice[0], pending_choice[1]) > 0.2:
+        print(f"added position {pending_choice[2]}")
         choices_history.append(pending_choice)
         pending_choice = None
 
